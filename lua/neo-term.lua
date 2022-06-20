@@ -4,7 +4,6 @@ local EXPR_NOREF_NOERR_TRUNC = { expr = true, noremap = true, silent = true, now
 -------------------------------------------------------------------------------------------------------
 M = { }
 local _parent_win_to_term_buf = { }
-local ON_REENTER = false
 
 local function found_buf_in_tabpage(t, b)
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(t)) do
@@ -13,47 +12,6 @@ local function found_buf_in_tabpage(t, b)
     end
   end
   return -1
-end
-
-local function open_term()
-  if vim.bo.buftype == 'terminal' then
-    vim.cmd('normal! a')
-    return
-  end
-  local parent_win = vim.api.nvim_get_current_win()
-  local parent_win_height = vim.fn.getwininfo(parent_win)[1].height
-  local bottom_split_size = parent_win_height * 0.3
-  local top_split_size = parent_win_height - bottom_split_size
-
-  if -- the terminal is already open
-    _parent_win_to_term_buf[parent_win] ~= nil
-    and found_buf_in_tabpage(0, _parent_win_to_term_buf[parent_win]) ~= -1
-    then
-    vim.api.nvim_set_current_win(found_buf_in_tabpage(0, _parent_win_to_term_buf[parent_win]))
-    return
-  end
-
-  local _splitbelow = vim.opt.splitbelow
-
-  vim.opt.splitbelow = true
-
-  vim.cmd('normal! H')
-  vim.cmd('split')
-  vim.cmd('resize ' .. bottom_split_size)
-  vim.cmd('wincmd p')
-  vim.cmd('resize ' .. top_split_size)
-  vim.cmd('wincmd p') -- at bottom split
-
-  if _parent_win_to_term_buf[parent_win] == nil
-    or not vim.api.nvim_buf_is_valid(_parent_win_to_term_buf[parent_win])
-    then
-    vim.cmd('term')
-    _parent_win_to_term_buf[parent_win] = vim.api.nvim_win_get_buf(0)
-  else
-    vim.api.nvim_set_current_buf(_parent_win_to_term_buf[parent_win])
-  end
-
-  vim.opt.splitbelow = _splitbelow
 end
 
 local function check_term_buf()
@@ -73,29 +31,12 @@ end
 -------------------------------------------------------------------------------------------------------
 
 function M.setup(opt)
-  M.toggle_keymap = opt.toggle_keymap ~= nil and opt.toggle_keymap or '<M-Tab>'
-  M.exit_term_mode_keymap = opt.exit_term_mode_keymap ~= nil and opt.exit_term_mode_keymap or '<M-w>'
   M.term_mode_hl = opt.term_mode_hl ~= nil and opt.term_mode_hl or 'CoolBlack'
   if M.term_mode_hl == 'CoolBlack' then
     vim.cmd([[
       hi CoolBlack guibg=#101010
     ]])
   end
-
-  vim.keymap.set('n', M.toggle_keymap, function () open_term() end, NOREF_NOERR_TRUNC)
-
-  vim.keymap.set('t', M.toggle_keymap, function ()
-    -- exit term-mode first
-    vim.api.nvim_feedkeys('', 't', true)
-    if _parent_win_to_term_buf[vim.api.nvim_get_current_win()] ~= nil then
-      vim.cmd('enew')
-      vim.cmd('NeoNoNameClean')
-    else
-      vim.cmd('q')
-    end
-  end, NOREF_NOERR_TRUNC)
-
-  vim.keymap.set('t', M.exit_term_mode_keymap, function () return '<C-\\><C-n>' end, EXPR_NOREF_NOERR_TRUNC)
 
   -- Setup pivots
   vim.api.nvim_create_autocmd('BufEnter', {
@@ -143,14 +84,66 @@ function M.setup(opt)
   })
 end
 
+function M.open_win_termbuf()
+  local parent_win = vim.api.nvim_get_current_win()
+  local parent_win_height = vim.fn.getwininfo(parent_win)[1].height
+  local bottom_split_size = parent_win_height * 0.3
+  local top_split_size = parent_win_height - bottom_split_size
+
+  if -- the window term-buf is already open
+    _parent_win_to_term_buf[parent_win] ~= nil
+    and found_buf_in_tabpage(0, _parent_win_to_term_buf[parent_win]) ~= -1
+    then -- set current window to it
+    vim.api.nvim_set_current_win(found_buf_in_tabpage(0, _parent_win_to_term_buf[parent_win]))
+    return
+  end
+
+  -- this makes things easier
+  local _splitbelow = vim.opt.splitbelow
+
+  vim.opt.splitbelow = true
+
+  vim.cmd('normal! H')
+  vim.cmd('split')
+  vim.cmd('resize ' .. bottom_split_size)
+  vim.cmd('wincmd p')
+  vim.cmd('resize ' .. top_split_size)
+  vim.cmd('wincmd p') -- at bottom split
+
+  if -- no child or child is invalid
+    _parent_win_to_term_buf[parent_win] == nil
+    or not vim.api.nvim_buf_is_valid(_parent_win_to_term_buf[parent_win])
+    then -- open a new one
+    vim.cmd('term')
+    _parent_win_to_term_buf[parent_win] = vim.api.nvim_win_get_buf(0)
+  else -- use existing one
+    vim.api.nvim_set_current_buf(_parent_win_to_term_buf[parent_win])
+  end
+
+  vim.opt.splitbelow = _splitbelow
+end
+
+function M.close_win_termbuf()
+  -- exit term-mode first
+  vim.cmd('NeoTermEnterNormal')
+  if _parent_win_to_term_buf[vim.api.nvim_get_current_win()] ~= nil then
+    vim.cmd('enew')
+    vim.cmd('NeoNoNameClean')
+  else
+    vim.cmd('q')
+  end
+end
+
 function M.remove_augroup_resetwinhl()
   vim.cmd('augroup ResetWinhl | autocmd! | augroup END')
 end
 
 local function setup_vim_commands()
-  -- vim.cmd [[
-  --   command! NeoTermToggle lua require'neo-term'.neo_term_toggle()
-  -- ]]
+  vim.cmd [[
+    command! NeoTermOpen lua require'neo-term'.open_win_termbuf()
+    command! NeoTermClose lua require'neo-term'.close_win_termbuf()
+    command! NeoTermEnterNormal lua vim.api.nvim_feedkeys('', 't', true)
+  ]]
 end
 
 setup_vim_commands()
