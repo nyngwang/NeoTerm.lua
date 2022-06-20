@@ -71,3 +71,8 @@ vim.keymap.set('n', '<M-{>', function ()
   vim.cmd('normal M')
 end, NOREF_NOERR_TRUNC)
 ```
+
+Result:
+
+https://user-images.githubusercontent.com/24765272/174679408-ec594bb9-a04e-4c40-bc27-ca774abdc196.mov
+
