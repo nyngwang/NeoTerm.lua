@@ -56,12 +56,16 @@ local function open_term()
 end
 
 local function check_term_buf()
+  local to_remove = {}
   for i, v in ipairs(_parent_win_to_term_buf) do
     if -- either parent_win or term_buf is invalid
       not vim.api.nvim_win_is_valid(i)
       or not vim.api.nvim_buf_is_valid(v) then
-      table.remove(_parent_win_to_term_buf, i)
+      to_remove[#to_remove+1] = i
     end
+  end
+  for _, v in ipairs(to_remove) do
+    table.remove(_parent_win_to_term_buf, v)
   end
 end
 
