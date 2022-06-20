@@ -5,7 +5,8 @@ Attach a term-buffer for each window.
 
 ## DEMO
 
-https://user-images.githubusercontent.com/24765272/174594232-d00d7584-07a3-434c-9e4d-c0bbeb5dbf56.mov
+https://user-images.githubusercontent.com/24765272/174679989-55301311-632a-4abe-9521-1df890f47f54.mov
+
 
 ## Feat.
 
