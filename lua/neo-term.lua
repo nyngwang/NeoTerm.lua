@@ -4,6 +4,7 @@ local EXPR_NOREF_NOERR_TRUNC = { expr = true, noremap = true, silent = true, now
 -------------------------------------------------------------------------------------------------------
 M = { }
 local _parent_win_to_term_buf = { }
+local ON_REENTER = false
 
 local function found_buf_in_tabpage(t, b)
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(t)) do
@@ -82,12 +83,18 @@ function M.setup(opt)
   end
 
   vim.keymap.set('n', M.toggle_keymap, function () open_term() end, NOREF_NOERR_TRUNC)
+
   vim.keymap.set('t', M.toggle_keymap, function ()
+    -- exit term-mode first
+    vim.api.nvim_feedkeys('', 't', true)
     if _parent_win_to_term_buf[vim.api.nvim_get_current_win()] ~= nil then
-      return "<C-\\><C-n> | <cmd>enew | lua vim.cmd('NeoNoNameClean')<CR>"
+      vim.cmd('enew')
+      vim.cmd('NeoNoNameClean')
+    else
+      vim.cmd('q')
     end
-    return "<C-\\><C-n> | <cmd>lua vim.cmd('q')<CR>"
-  end, EXPR_NOREF_NOERR_TRUNC)
+  end, NOREF_NOERR_TRUNC)
+
   vim.keymap.set('t', M.exit_term_mode_keymap, function () return '<C-\\><C-n>' end, EXPR_NOREF_NOERR_TRUNC)
 
   -- Setup pivots
@@ -140,5 +147,12 @@ function M.remove_augroup_resetwinhl()
   vim.cmd('augroup ResetWinhl | autocmd! | augroup END')
 end
 
+local function setup_vim_commands()
+  -- vim.cmd [[
+  --   command! NeoTermToggle lua require'neo-term'.neo_term_toggle()
+  -- ]]
+end
+
+setup_vim_commands()
 
 return M
