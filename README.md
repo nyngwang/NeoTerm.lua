@@ -12,8 +12,6 @@ https://user-images.githubusercontent.com/24765272/174679989-55301311-632a-4abe-
 
 - ~0ms load time (=150 lines)
 - Built from the best layout-preserving buffer deletion plugin [`nyngwang/NeoNoName.lua`](https://github.com/nyngwang/NeoNoName.lua)
-- The logic is fucking hard
-  - so you probably don't want to do it yourself (again)
 - Focus on UX:
   - Easy to config (you won't forget how to update the config 10 years later)
   - Copy-paste-and-lets-go config below
