@@ -1,31 +1,26 @@
 NeoTerm.lua
 -----
 
-Just like the <code>`</code> of VSCode.
-
-Still work in progress, see WARN.
+Attach a term-buffer for each window.
 
 ## DEMO
 
-https://user-images.githubusercontent.com/24765272/174507066-f2ff0821-ab75-4768-8734-0d0880deae0d.mov
+https://user-images.githubusercontent.com/24765272/174594232-d00d7584-07a3-434c-9e4d-c0bbeb5dbf56.mov
 
 ## Feat.
 
-- Lightweight (<100 lines)
-- Visual candy:
-  - term-bg-color == in term-mode
-  - no term-bg-color == in normal-mode
-  - Color is customizable
-
-### WARN
-
-- The current `toggle_keymap` will kill current session on close.
-- Fix height instead of relative height
+- Lightweight but powerful (<150 lines)
+- The logic is tricky, so let me do it for you
+- Zero-config is possible (See **Config** below)
+- Put emphasis on UX:
+  - See `winhl` == in term-mode, vise versa.
+  - Color is customizable (`term_mode_hl`)
+  - Auto enter term-mode on `BufEnter`
+  - Can switch from normal-mode to term-mode without exit if `NeoNoName.lua` is used
+- Layout preserviing (`row`,`col`,`topline` are all kept)
 
 
 ## Config
-
-This plugin requires `NeoNoName.lua`.
 
 ```lua
 use {
@@ -37,7 +32,6 @@ use {
     require('neo-term').setup {
       -- toggle_keymap = '<M-Tab>'
       -- exit_term_mode_keymap = '<M-w>'
-      -- neo_no_name_keymap = '<M-w>'
       -- term_mode_hl = 'CoolBlack' -- this is #101010
     }
   end
