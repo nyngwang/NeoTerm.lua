@@ -78,7 +78,12 @@ function M.setup(opt)
   end
 
   vim.keymap.set('n', M.toggle_keymap, function () open_term() end, NOREF_NOERR_TRUNC)
-  vim.keymap.set('t', M.toggle_keymap, function () return "<C-\\><C-n> | <cmd>lua vim.cmd('q')<CR>" end, EXPR_NOREF_NOERR_TRUNC)
+  vim.keymap.set('t', M.toggle_keymap, function ()
+    if _parent_win_to_term_buf[vim.api.nvim_get_current_win()] ~= nil then
+      return "<C-\\><C-n> | <cmd>enew | lua vim.cmd('NeoNoNameClean')<CR>"
+    end
+    return "<C-\\><C-n> | <cmd>lua vim.cmd('q')<CR>"
+  end, EXPR_NOREF_NOERR_TRUNC)
   vim.keymap.set('t', M.exit_term_mode_keymap, function () return '<C-\\><C-n>' end, EXPR_NOREF_NOERR_TRUNC)
 
   -- Setup pivots
