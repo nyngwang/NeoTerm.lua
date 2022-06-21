@@ -2,7 +2,7 @@ local NOREF_NOERR_TRUNC = { noremap = true, silent = true, nowait = true }
 local NOREF_NOERR = { noremap = true, silent = true }
 local EXPR_NOREF_NOERR_TRUNC = { expr = true, noremap = true, silent = true, nowait = true }
 -------------------------------------------------------------------------------------------------------
-M = { }
+local M = { }
 local _parent_win_to_term_buf = { }
 
 local function found_buf_in_tabpage(t, b)
@@ -32,6 +32,7 @@ end
 
 function M.setup(opt)
   M.term_mode_hl = opt.term_mode_hl ~= nil and opt.term_mode_hl or 'CoolBlack'
+  M.split_size = opt.split_size ~= nil and opt.split_size or 0.35
   if M.term_mode_hl == 'CoolBlack' then
     vim.cmd([[
       hi CoolBlack guibg=#101010
@@ -63,7 +64,6 @@ function M.setup(opt)
   })
 
   -- Setup variations
-  local term_mode_hl = M.term_mode_hl
   local cmd_str = [[
     augroup ResetWinhl
       autocmd!
@@ -77,7 +77,7 @@ function M.setup(opt)
     callback = function ()
       if vim.api.nvim_buf_get_option(0, 'buflisted') then
         vim.cmd(cmd_str:gsub('$(%S+)', {
-          term_mode_hl = term_mode_hl
+          term_mode_hl = M.term_mode_hl
         }))
       end
     end
@@ -87,7 +87,7 @@ end
 function M.open_win_termbuf()
   local parent_win = vim.api.nvim_get_current_win()
   local parent_win_height = vim.fn.getwininfo(parent_win)[1].height
-  local bottom_split_size = parent_win_height * 0.3
+  local bottom_split_size = parent_win_height * M.split_size
   local top_split_size = parent_win_height - bottom_split_size
 
   if -- the window term-buf is already open

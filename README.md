@@ -35,6 +35,7 @@ use {
   config = function ()
     require('neo-term').setup {
       -- term_mode_hl = 'CoolBlack' -- this is #101010
+      -- split_size = 0.35
     }
     vim.keymap.set('n', '<M-Tab>', function ()
       if vim.bo.buftype == 'terminal' then vim.cmd('normal! a')
