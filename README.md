@@ -47,6 +47,32 @@ use {
 }
 ```
 
+My extreme customization example:
+
+```lua
+    local split_wins = {}
+    vim.keymap.set('n', '<M-Tab>', function ()
+      if vim.bo.filetype == 'neo-tree' then return end
+      local cur_win = vim.api.nvim_get_current_win()
+      if split_wins[cur_win] then
+        if vim.bo.buftype == 'terminal' then vim.cmd('normal! a')
+        else
+          vim.cmd('q')
+          table.remove(split_wins, cur_win)
+        end
+        return
+      end
+      -- cur_win is a new parent
+      vim.cmd('NeoTermOpen')
+      split_wins[vim.api.nvim_get_current_win()] = true
+    end, NOREF_NOERR_TRUNC)
+    vim.keymap.set('t', '<M-Tab>', function ()
+      table.remove(split_wins, vim.api.nvim_get_current_win())
+      vim.cmd('NeoTermClose')
+    end, NOREF_NOERR_TRUNC)
+```
+
+
 ### bufferline.nvim
 
 ```lua
