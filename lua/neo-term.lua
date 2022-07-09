@@ -14,7 +14,7 @@ local function found_buf_in_tabpage(t, b)
   return -1
 end
 
-local function check_term_buf()
+local function remove_invalid_mappings()
   local to_remove = {}
   for i, v in ipairs(_parent_win_to_term_buf) do
     if -- either parent_win or term_buf is invalid
@@ -42,43 +42,34 @@ function M.setup(opt)
   -- Setup pivots
   vim.api.nvim_create_autocmd('BufEnter', {
     pattern = '*',
-    command = 'set winhl=' -- Must start from no highlight.
-  })
-  vim.api.nvim_create_autocmd({ 'BufEnter', 'WinEnter', 'TermOpen' }, {
-    pattern = 'term://*',
-    command = 'startinsert' -- Auto enter term-buf.
-  })
-  vim.api.nvim_create_autocmd('BufLeave', {
-    pattern = 'term://*',
-    callback = function () -- No more insert mode after leaving.
-      if vim.api.nvim_buf_get_option(0, 'buflisted') then
-        vim.cmd('stopinsert')
-      end
+    callback = function ()
+      remove_invalid_mappings()
+      vim.cmd('set winhl=') -- Start from no highlight.
     end
   })
-  vim.api.nvim_create_autocmd('BufEnter', {
-    pattern = '*',
-    callback = function () -- No more insert mode after leaving.
-      check_term_buf()
-    end
-  })
-
-  -- Setup variations
-  local cmd_str = [[
-    augroup ResetWinhl
-      autocmd!
-      autocmd TermEnter * if &buflisted | set winhl=Normal:$term_mode_hl | endif
-      autocmd TermLeave * set winhl=
-    augroup END
-  ]]
-
   vim.api.nvim_create_autocmd({ 'BufEnter', 'TermOpen' }, {
     pattern = 'term://*',
     callback = function ()
       if vim.api.nvim_buf_get_option(0, 'buflisted') then
-        vim.cmd(cmd_str:gsub('$(%S+)', {
-          term_mode_hl = M.term_mode_hl
-        }))
+        vim.cmd('startinsert') -- Auto-`a` on enter term-buf.
+        vim.cmd(string.gsub( -- Enable au-`ResetWinhl` on enter term-buf.
+          [[
+            augroup ResetWinhl
+              autocmd!
+              autocmd TermEnter * if &buflisted | set winhl=Normal:$term_mode_hl | endif
+            augroup END
+          ]],
+          '$(%S+)',
+          { term_mode_hl = M.term_mode_hl }
+        ))
+      end
+    end
+  })
+  vim.api.nvim_create_autocmd('BufLeave', {
+    pattern = 'term://*',
+    callback = function ()
+      if vim.api.nvim_buf_get_option(0, 'buflisted') then
+        vim.cmd('stopinsert') -- Disable auto-`a` on exit term-buf.
       end
     end
   })
