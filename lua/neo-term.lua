@@ -127,6 +127,7 @@ function M.close_win_termbuf()
     vim.cmd('NeoNoNameClean')
   else
     vim.cmd('q')
+    vim.cmd('normal! ')
   end
 end
 
