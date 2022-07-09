@@ -1,7 +1,7 @@
 NeoTerm.lua
 -----
 
-Attach a term-buffer for each window.
+Attach a term-buffer for each **buffer**.
 
 ## DEMO
 
@@ -10,8 +10,8 @@ https://user-images.githubusercontent.com/24765272/174679989-55301311-632a-4abe-
 
 ## Feat.
 
-- ~0ms load time (=150 lines)
-- Built from the best layout-preserving buffer deletion plugin [`nyngwang/NeoNoName.lua`](https://github.com/nyngwang/NeoNoName.lua)
+- ~0ms load time (lines < 160)
+- No dependency
 - Focus on UX:
   - Easy to config (you won't forget how to update the config 10 years later)
   - Copy-paste-and-lets-go config below
@@ -31,47 +31,21 @@ local NOREF_NOERR_TRUNC = { noremap = true, silent = true, nowait = true }
 
 use {
   'nyngwang/NeoTerm.lua',
-  requires = { 'nyngwang/NeoNoName.lua' },
   config = function ()
     require('neo-term').setup {
-      -- term_mode_hl = 'CoolBlack' -- this is #101010
-      -- split_size = 0.35
+      -- split_on_top = true,
+      -- split_size = 0.5,
     }
     vim.keymap.set('n', '<M-Tab>', function ()
-      if vim.bo.buftype == 'terminal' then vim.cmd('normal! a')
-      else vim.cmd('NeoTermOpen') end
+      if vim.bo.filetype == 'neo-tree' then return end
+      vim.cmd('NeoTermOpen')
     end, NOREF_NOERR_TRUNC)
     vim.keymap.set('t', '<M-Tab>', function () vim.cmd('NeoTermClose') end, NOREF_NOERR_TRUNC)
     vim.keymap.set('t', '<C-w>', function () vim.cmd('NeoTermEnterNormal') end, NOREF_NOERR_TRUNC)
+    vim.keymap.set('t', '<M-w>', function () vim.cmd('NeoTermEnterNormal') end, NOREF_NOERR_TRUNC)
   end
 }
 ```
-
-My extreme customization example:
-
-```lua
-    local split_wins = {}
-    vim.keymap.set('n', '<M-Tab>', function ()
-      if vim.bo.filetype == 'neo-tree' then return end
-      local cur_win = vim.api.nvim_get_current_win()
-      if split_wins[cur_win] then
-        if vim.bo.buftype == 'terminal' then vim.cmd('normal! a')
-        else
-          vim.cmd('q')
-          table.remove(split_wins, cur_win)
-        end
-        return
-      end
-      -- cur_win is a new parent
-      vim.cmd('NeoTermOpen')
-      split_wins[vim.api.nvim_get_current_win()] = true
-    end, NOREF_NOERR_TRUNC)
-    vim.keymap.set('t', '<M-Tab>', function ()
-      table.remove(split_wins, vim.api.nvim_get_current_win())
-      vim.cmd('NeoTermClose')
-    end, NOREF_NOERR_TRUNC)
-```
-
 
 ### bufferline.nvim
 
