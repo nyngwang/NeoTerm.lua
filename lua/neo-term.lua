@@ -91,9 +91,12 @@ function M.open_termbuf()
   else _restore_cursor = true end
 
   local win_of_termbuf = found_buf_in_tabpage(0, _parent_buf_to_term_buf[parent_buf])
-  if win_of_termbuf ~= -1
-    and _split_wins[win_of_termbuf] then
+  if win_of_termbuf ~= -1 and _split_wins[win_of_termbuf] then
+    local cur_win = vim.api.nvim_get_current_win()
+    table.remove(_split_wins, win_of_termbuf)
     vim.api.nvim_set_current_win(win_of_termbuf)
+    vim.cmd('q')
+    vim.api.nvim_set_current_win(cur_win)
     return
   end
 
