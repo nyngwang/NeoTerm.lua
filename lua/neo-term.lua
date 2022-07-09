@@ -113,7 +113,8 @@ function M.open_termbuf()
   _split_wins[vim.api.nvim_get_current_win()] = true
 
   if -- termbuf for this win exists
-    _parent_buf_to_term_buf[parent_buf] ~= nil then
+    _parent_buf_to_term_buf[parent_buf] ~= nil
+    and vim.api.nvim_buf_is_valid(_parent_buf_to_term_buf[parent_buf]) then
     vim.api.nvim_set_current_buf(_parent_buf_to_term_buf[parent_buf])
   else
     vim.cmd('term')
