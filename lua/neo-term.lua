@@ -3,7 +3,8 @@ local NOREF_NOERR = { noremap = true, silent = true }
 local EXPR_NOREF_NOERR_TRUNC = { expr = true, noremap = true, silent = true, nowait = true }
 -------------------------------------------------------------------------------------------------------
 local M = { }
-local _parent_win_to_term_buf = { }
+local _parent_buf_to_term_buf = { }
+local _split_wins = { }
 
 local function found_buf_in_tabpage(t, b)
   if b == nil then return -1 end
@@ -17,15 +18,16 @@ end
 
 local function remove_invalid_mappings()
   local to_remove = {}
-  for i, v in ipairs(_parent_win_to_term_buf) do
-    if -- either parent_win or term_buf is invalid
-      not vim.api.nvim_win_is_valid(i)
-      or not vim.api.nvim_buf_is_valid(v) then
+  for i, v in ipairs(_parent_buf_to_term_buf) do
+    if not (
+        vim.api.nvim_buf_is_valid(i)
+        and vim.api.nvim_buf_is_valid(v)
+      ) then
       to_remove[#to_remove+1] = i
     end
   end
   for _, v in ipairs(to_remove) do
-    table.remove(_parent_win_to_term_buf, v)
+    table.remove(_parent_buf_to_term_buf, v)
   end
 end
 
@@ -53,8 +55,8 @@ function M.setup(opt)
     pattern = 'term://*',
     callback = function ()
       if vim.api.nvim_buf_get_option(0, 'buflisted') then
-        vim.cmd('startinsert') -- Auto-`a` on enter term-buf.
-        vim.cmd(string.gsub( -- Enable au-`ResetWinhl` on enter term-buf.
+        vim.cmd('startinsert') -- Auto-`a` on enter termbuf.
+        vim.cmd(string.gsub( -- Enable au-`ResetWinhl` on enter termbuf.
           [[
             augroup ResetWinhl
               autocmd!
@@ -71,20 +73,22 @@ function M.setup(opt)
     pattern = 'term://*',
     callback = function ()
       if vim.api.nvim_buf_get_option(0, 'buflisted') then
-        vim.cmd('stopinsert') -- Disable auto-`a` on exit term-buf.
+        vim.cmd('stopinsert') -- Disable auto-`a` on exit termbuf.
       end
     end
   })
 end
 
-function M.open_win_termbuf()
-  local parent_win = vim.api.nvim_get_current_win()
-  local parent_win_height = vim.fn.getwininfo(parent_win)[1].height
+function M.open_termbuf()
+  local parent_buf = vim.api.nvim_get_current_buf()
+  local parent_win_height = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1].height
   local termbuf_size = parent_win_height * M.split_size
   local parent_size = parent_win_height - termbuf_size
 
-  if found_buf_in_tabpage(0, _parent_win_to_term_buf[parent_win]) ~= -1 then
-    vim.api.nvim_set_current_win(found_buf_in_tabpage(0, _parent_win_to_term_buf[parent_win]))
+  local win_of_termbuf = found_buf_in_tabpage(0, _parent_buf_to_term_buf[parent_buf])
+  if win_of_termbuf ~= -1
+    and _split_wins[win_of_termbuf] then
+    vim.api.nvim_set_current_win(win_of_termbuf)
     return
   end
 
@@ -105,27 +109,24 @@ function M.open_win_termbuf()
   vim.cmd('resize ' .. termbuf_size)
   vim.cmd('wincmd p')
   vim.cmd('resize ' .. parent_size)
-  vim.cmd('wincmd p') -- at bottom split
+  vim.cmd('wincmd p') -- cursor at termbuf split
+  _split_wins[vim.api.nvim_get_current_win()] = true
 
   if -- termbuf for this win exists
-    _parent_win_to_term_buf[parent_win] ~= nil
-    and vim.api.nvim_buf_is_valid(_parent_win_to_term_buf[parent_win]) then
-    vim.api.nvim_set_current_buf(_parent_win_to_term_buf[parent_win])
+    _parent_buf_to_term_buf[parent_buf] ~= nil then
+    vim.api.nvim_set_current_buf(_parent_buf_to_term_buf[parent_buf])
   else
     vim.cmd('term')
-    _parent_win_to_term_buf[parent_win] = vim.api.nvim_win_get_buf(0)
+    _parent_buf_to_term_buf[parent_buf] = vim.api.nvim_win_get_buf(0)
   end
 
   vim.opt.splitbelow = _splitbelow
 end
 
-function M.close_win_termbuf()
-  -- exit term-mode first
-  vim.cmd('NeoTermEnterNormal')
-  if _parent_win_to_term_buf[vim.api.nvim_get_current_win()] ~= nil then
-    vim.cmd('enew')
-    vim.cmd('NeoNoNameClean')
-  else
+function M.close_termbuf()
+  vim.cmd('NeoTermEnterNormal') -- exit term-insert-mode or do nothing
+  if _split_wins[vim.api.nvim_get_current_win()] then
+    table.remove(_split_wins, vim.api.nvim_get_current_win())
     vim.cmd('q')
     vim.cmd('normal! ')
   end
@@ -137,8 +138,8 @@ end
 
 local function setup_vim_commands()
   vim.cmd [[
-    command! NeoTermOpen lua require'neo-term'.open_win_termbuf()
-    command! NeoTermClose lua require'neo-term'.close_win_termbuf()
+    command! NeoTermOpen lua require'neo-term'.open_termbuf()
+    command! NeoTermClose lua require'neo-term'.close_termbuf()
     command! NeoTermEnterNormal lua vim.api.nvim_feedkeys('', 't', true)
   ]]
 end
