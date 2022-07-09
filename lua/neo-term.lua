@@ -42,7 +42,7 @@ function M.setup(opt)
   end
 
   -- Setup pivots
-  vim.api.nvim_create_autocmd('BufEnter', {
+  vim.api.nvim_create_autocmd({ 'BufEnter', 'TermLeave' }, {
     pattern = '*',
     callback = function ()
       remove_invalid_mappings()
