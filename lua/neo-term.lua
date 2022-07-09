@@ -5,6 +5,7 @@ local EXPR_NOREF_NOERR_TRUNC = { expr = true, noremap = true, silent = true, now
 local M = { }
 local _parent_buf_to_term_buf = { }
 local _split_wins = { }
+local _restore_cursor = false
 
 local function found_buf_in_tabpage(t, b)
   if b == nil then return -1 end
@@ -85,6 +86,10 @@ function M.open_termbuf()
   local termbuf_size = parent_win_height * M.split_size
   local parent_size = parent_win_height - termbuf_size
 
+  if vim.api.nvim_buf_get_name(parent_buf) == ''
+  then _restore_cursor = false
+  else _restore_cursor = true end
+
   local win_of_termbuf = found_buf_in_tabpage(0, _parent_buf_to_term_buf[parent_buf])
   if win_of_termbuf ~= -1
     and _split_wins[win_of_termbuf] then
@@ -129,7 +134,7 @@ function M.close_termbuf()
   if _split_wins[vim.api.nvim_get_current_win()] then
     table.remove(_split_wins, vim.api.nvim_get_current_win())
     vim.cmd('q')
-    vim.cmd('normal! ')
+    if _restore_cursor then vim.cmd('normal! ') end
   end
 end
 
