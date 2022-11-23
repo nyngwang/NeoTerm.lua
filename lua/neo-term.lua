@@ -1,6 +1,7 @@
 local NOREF_NOERR_TRUNC = { noremap = true, silent = true, nowait = true }
 local NOREF_NOERR = { noremap = true, silent = true }
 local EXPR_NOREF_NOERR_TRUNC = { expr = true, noremap = true, silent = true, nowait = true }
+vim.api.nvim_create_augroup('neo-term.lua', { clear = true })
 -------------------------------------------------------------------------------------------------------
 local M = { }
 local _parent_buf_to_term_buf = { }
@@ -46,6 +47,7 @@ function M.setup(opt)
 
   -- Setup pivots
   vim.api.nvim_create_autocmd({ 'BufEnter', 'TermLeave' }, {
+    group = 'neo-term.lua',
     pattern = '*',
     callback = function ()
       remove_invalid_mappings()
@@ -53,24 +55,27 @@ function M.setup(opt)
     end
   })
   vim.api.nvim_create_autocmd({ 'BufEnter', 'TermOpen' }, {
+    group = 'neo-term.lua',
     pattern = 'term://*',
     callback = function ()
       if vim.api.nvim_buf_get_option(0, 'buflisted') then
         vim.cmd('startinsert') -- Auto-`a` on enter termbuf.
-        vim.cmd(string.gsub( -- Enable au-`ResetWinhl` on enter termbuf.
-          [[
-            augroup ResetWinhl
-              autocmd!
-              autocmd TermEnter * if &buflisted | set winhl=Normal:$term_mode_hl | endif
-            augroup END
-          ]],
-          '$(%S+)',
-          { term_mode_hl = M.term_mode_hl }
-        ))
+        vim.api.nvim_create_augroup('neo-term.lua/ResetWinhl', { clear = true })
+        vim.api.nvim_create_autocmd('TermEnter', {
+          -- Enable au-`ResetWinhl` on enter termbuf.
+          group = 'neo-term.lua/ResetWinhl',
+          pattern = '*',
+          command = string.gsub(
+            [[ if &buflisted | set winhl=Normal:$term_mode_hl | endif ]],
+            '$(%S+)',
+            { term_mode_hl = M.term_mode_hl }
+          )
+        })
       end
     end
   })
   vim.api.nvim_create_autocmd('BufLeave', {
+    group = 'neo-term.lua',
     pattern = 'term://*',
     callback = function ()
       if vim.api.nvim_buf_get_option(0, 'buflisted') then
@@ -142,7 +147,7 @@ function M.close_termbuf()
 end
 
 function M.remove_augroup_resetwinhl()
-  vim.cmd('augroup ResetWinhl | autocmd! | augroup END')
+  vim.api.nvim_create_augroup('neo-term.lua/ResetWinhl', { clear = true })
 end
 
 local function setup_vim_commands()
