@@ -39,12 +39,14 @@ use {
       exclude_filetypes = { 'neo-tree', 'dashboard' },
     }
     vim.keymap.set('n', '<M-Tab>', function ()
-      if vim.bo.filetype == 'neo-tree' then return end
-      vim.cmd('NeoTermOpen')
+      if vim.bo.buftype == 'terminal' then
+        vim.cmd('normal! i')
+        vim.cmd('NeoTermClose')
+      else
+        vim.cmd('NeoTermOpen')
+      end
     end, NOREF_NOERR_TRUNC)
-    vim.keymap.set('t', '<M-Tab>', function () vim.cmd('NeoTermClose') end, NOREF_NOERR_TRUNC)
-    vim.keymap.set('t', '<C-w>', function () vim.cmd('NeoTermEnterNormal') end, NOREF_NOERR_TRUNC)
-    vim.keymap.set('t', '<M-w>', function () vim.cmd('NeoTermEnterNormal') end, NOREF_NOERR_TRUNC)
+    vim.keymap.set('t', '<M-Tab>', function () vim.cmd('NeoTermEnterNormal') end, NOREF_NOERR_TRUNC)
   end
 }
 ```
