@@ -35,6 +35,8 @@ use {
     require('neo-term').setup {
       -- split_on_top = true,
       -- split_size = 0.5,
+      exclude_buftypes = nil, -- these two options will affect `NeoTermOpen`
+      exclude_filetypes = { 'neo-tree', 'dashboard' },
     }
     vim.keymap.set('n', '<M-Tab>', function ()
       if vim.bo.filetype == 'neo-tree' then return end

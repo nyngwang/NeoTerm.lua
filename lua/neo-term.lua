@@ -39,6 +39,8 @@ function M.setup(opt)
   M.term_mode_hl = opt.term_mode_hl ~= nil and opt.term_mode_hl or 'CoolBlack'
   M.split_size = opt.split_size ~= nil and opt.split_size or 0.35
   M.split_on_top = opt.split_on_top ~= nil and opt.split_on_top or false
+  M.exclude_filetypes = opt.exclude_filetypes ~= nil and opt.exclude_filetypes or {}
+  M.exclude_buftypes = opt.exclude_buftypes ~= nil and opt.exclude_buftypes or {}
   if M.term_mode_hl == 'CoolBlack' then
     vim.cmd([[
       hi CoolBlack guibg=#101010
@@ -86,6 +88,9 @@ function M.setup(opt)
 end
 
 function M.open_termbuf()
+  for _, v in ipairs(M.exclude_filetypes) do if vim.bo.filetype == v then return end end
+  for _, v in ipairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
+
   local parent_buf = vim.api.nvim_get_current_buf()
   local parent_win_height = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1].height
   local termbuf_size = parent_win_height * M.split_size
