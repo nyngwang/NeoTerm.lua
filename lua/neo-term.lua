@@ -97,17 +97,6 @@ function M.open_termbuf()
   local termbuf_size = parent_win_height * M.split_size
   local parent_size = parent_win_height - termbuf_size
 
-  -- TRY: don't need to close existing termbuf.
-  -- local win_of_termbuf = found_buf_in_tabpage(0, _parent_buf_to_term_buf[parent_buf])
-  -- if win_of_termbuf ~= -1 and _split_wins[win_of_termbuf] then
-  --   local cur_win = vim.api.nvim_get_current_win()
-  --   table.remove(_split_wins, win_of_termbuf)
-  --   vim.api.nvim_set_current_win(win_of_termbuf)
-  --   vim.cmd('q')
-  --   vim.api.nvim_set_current_win(cur_win)
-  --   return
-  -- end
-
   -- this makes things easier
   local _splitbelow = vim.opt.splitbelow
   _enter_views[vim.api.nvim_get_current_buf()] = vim.fn.winsaveview()
@@ -143,18 +132,14 @@ function M.open_termbuf()
 end
 
 function M.close_termbuf()
-  -- should only work on terminal buffer.
+  -- double check for users.
   if not vim.bo.buftype == 'terminal' then return end
-
-  -- we also do this again in case the user forgot to call it.
   vim.cmd('NeoTermEnterNormal')
 
-  -- close it anyway, and restore view as long as it's parent_buf.
   local term_buf = vim.api.nvim_get_current_buf()
   vim.cmd('q')
   local final_buf = vim.api.nvim_get_current_buf()
   if _parent_buf_to_term_buf[final_buf] == term_buf then
-    -- restore back to the enter view.
     vim.fn.winrestview(_enter_views[final_buf])
   end
 end
