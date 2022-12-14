@@ -1,6 +1,3 @@
-local NOREF_NOERR_TRUNC = { noremap = true, silent = true, nowait = true }
-local NOREF_NOERR = { noremap = true, silent = true }
-local EXPR_NOREF_NOERR_TRUNC = { expr = true, noremap = true, silent = true, nowait = true }
 vim.api.nvim_create_augroup('neo-term.lua', { clear = true })
 -------------------------------------------------------------------------------------------------------
 local M = { }
@@ -26,19 +23,23 @@ local function remove_invalid_mappings()
   end
 end
 
+local function add_cool_black()
+  vim.api.nvim_create_autocmd({ 'VimEnter', 'ColorScheme' }, {
+    group = 'neo-term.lua',
+    pattern = '*',
+    callback = function () vim.cmd('hi __NEO_TERM_COOL_BLACK guibg=#101010') end
+  })
+end
+add_cool_black()
+
 -------------------------------------------------------------------------------------------------------
 
 function M.setup(opt)
-  M.term_mode_hl = opt.term_mode_hl ~= nil and opt.term_mode_hl or 'CoolBlack'
+  M.term_mode_hl = opt.term_mode_hl ~= nil and opt.term_mode_hl or '__NEO_TERM_COOL_BLACK'
   M.split_size = opt.split_size ~= nil and opt.split_size or 0.35
   M.split_on_top = opt.split_on_top ~= nil and opt.split_on_top or false
   M.exclude_filetypes = opt.exclude_filetypes ~= nil and opt.exclude_filetypes or {}
   M.exclude_buftypes = opt.exclude_buftypes ~= nil and opt.exclude_buftypes or {}
-  if M.term_mode_hl == 'CoolBlack' then
-    vim.cmd([[
-      hi CoolBlack guibg=#101010
-    ]])
-  end
 
   -- Setup pivots
   vim.api.nvim_create_autocmd({ 'BufEnter', 'TermLeave' }, {
