@@ -25,11 +25,44 @@ local function remove_invalid_mappings()
 end
 
 
-local function add_cool_black()
+local function create_autocmds()
+  -- coloring
   vim.api.nvim_create_autocmd({ 'VimEnter', 'ColorScheme' }, {
     group = 'neo-term.lua',
     pattern = '*',
     callback = function () vim.cmd('hi NEO_TERM_COOL_BLACK guibg=#101010') end
+  })
+
+  -- auto-insert on enter term-buf.
+  vim.api.nvim_create_autocmd({ 'BufEnter', 'TermOpen' }, {
+    group = 'neo-term.lua',
+    pattern = 'term://*', -- this is required to prevent `startinsert` on normal buffers.
+    callback = function ()
+      if not vim.api.nvim_buf_get_option(0, 'buflisted') then return end
+      vim.cmd('startinsert')
+    end
+  })
+  -- change bg-color on enter term-mode.
+  vim.api.nvim_create_autocmd({ 'TermEnter' }, {
+    group = 'neo-term.lua',
+    pattern = '*',
+    callback = function ()
+      if not vim.api.nvim_buf_get_option(0, 'buflisted') then return end
+      vim.cmd(string.gsub(
+        [[ set winhl=Normal:$term_mode_hl ]],
+        '$(%S+)',
+        { term_mode_hl = M.term_mode_hl }
+      ))
+    end
+  })
+  -- reset bg-color on leave term-mode.
+  vim.api.nvim_create_autocmd({ 'TermLeave' }, {
+    group = 'neo-term.lua',
+    pattern = '*',
+    callback = function ()
+      if not vim.api.nvim_buf_get_option(0, 'buflisted') then return end
+      vim.cmd('set winhl=')
+    end
   })
 end
 
@@ -44,49 +77,7 @@ function M.setup(opt)
   M.exclude_filetypes = opt.exclude_filetypes and opt.exclude_filetypes or {}
   M.exclude_buftypes = opt.exclude_buftypes and opt.exclude_buftypes or {}
 
-  -- TODO: simplify these shits
-  -- Setup pivots
-  vim.api.nvim_create_autocmd({ 'BufEnter', 'TermLeave' }, {
-    group = 'neo-term.lua',
-    pattern = '*',
-    callback = function ()
-      remove_invalid_mappings()
-      -- TODO: can I remove this?
-      vim.cmd('set winhl=') -- Start from no highlight.
-    end
-  })
-  vim.api.nvim_create_autocmd({ 'BufEnter', 'TermOpen' }, {
-    group = 'neo-term.lua',
-    pattern = 'term://*',
-    callback = function ()
-      if vim.api.nvim_buf_get_option(0, 'buflisted') then
-        vim.cmd('startinsert') -- Auto-`a` on enter termbuf.
-        vim.api.nvim_create_augroup('neo-term.lua/ResetWinhl', { clear = true })
-        vim.api.nvim_create_autocmd('TermEnter', {
-          -- Enable au-`ResetWinhl` on enter termbuf.
-          group = 'neo-term.lua/ResetWinhl',
-          pattern = '*',
-          command = string.gsub(
-            [[ if &buflisted | set winhl=Normal:$term_mode_hl | endif ]],
-            '$(%S+)',
-            { term_mode_hl = M.term_mode_hl }
-          )
-        })
-      end
-    end
-  })
-  -- TODO: can I remove this?
-  vim.api.nvim_create_autocmd('BufLeave', {
-    group = 'neo-term.lua',
-    -- TODO: can I remove this?
-    pattern = 'term://*',
-    callback = function ()
-      if vim.api.nvim_buf_get_option(0, 'buflisted') then
-        vim.cmd('stopinsert') -- Disable auto-`a` on exit termbuf.
-      end
-    end
-  })
-  add_cool_black()
+  create_autocmds()
 end
 
 
@@ -153,11 +144,7 @@ function M.close_termbuf()
   if buf_open_to_term[close_buf] == term_buf then
     vim.fn.winrestview(view_of_open_buf[close_buf])
   end
-end
-
-
-function M.remove_augroup_resetwinhl()
-  vim.api.nvim_create_augroup('neo-term.lua/ResetWinhl', { clear = true })
+  remove_invalid_mappings()
 end
 
 
