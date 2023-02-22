@@ -1,6 +1,7 @@
+local A = require('neo-term.utils.autocmd')
+local M = { }
 vim.api.nvim_create_augroup('neo-term.lua', { clear = true })
 -------------------------------------------------------------------------------------------------------
-local M = { }
 local buf_open_to_term = { }
 local win_open_to_term = { }
 local view_of_open_buf = { }
@@ -25,59 +26,22 @@ local function remove_invalid_mappings()
 end
 
 
-local function create_autocmds()
-  -- coloring
-  vim.api.nvim_create_autocmd({ 'VimEnter', 'ColorScheme' }, {
-    group = 'neo-term.lua',
-    pattern = '*',
-    callback = function () vim.cmd('hi NEO_TERM_COOL_BLACK guibg=#101010') end
-  })
-
-  -- auto-insert on enter term-buf.
-  vim.api.nvim_create_autocmd({ 'BufEnter', 'TermOpen' }, {
-    group = 'neo-term.lua',
-    pattern = 'term://*', -- this is required to prevent `startinsert` on normal buffers.
-    callback = function ()
-      if not vim.api.nvim_buf_get_option(0, 'buflisted') then return end
-      vim.cmd('startinsert')
-    end
-  })
-  -- change bg-color on enter term-mode.
-  vim.api.nvim_create_autocmd({ 'TermEnter' }, {
-    group = 'neo-term.lua',
-    pattern = '*',
-    callback = function ()
-      if not vim.api.nvim_buf_get_option(0, 'buflisted') then return end
-      vim.cmd(string.gsub(
-        [[ set winhl=Normal:$term_mode_hl ]],
-        '$(%S+)',
-        { term_mode_hl = M.term_mode_hl }
-      ))
-    end
-  })
-  -- reset bg-color on leave term-mode.
-  vim.api.nvim_create_autocmd({ 'TermLeave' }, {
-    group = 'neo-term.lua',
-    pattern = '*',
-    callback = function ()
-      if not vim.api.nvim_buf_get_option(0, 'buflisted') then return end
-      vim.cmd('set winhl=')
-    end
-  })
-end
-
-
 -------------------------------------------------------------------------------------------------------
-function M.setup(opt)
-  if not opt then opt = {} end
+function M.setup(opts)
+  if not opts then opts = {} end
 
-  M.term_mode_hl = opt.term_mode_hl and opt.term_mode_hl or 'NEO_TERM_COOL_BLACK'
-  M.split_size = opt.split_size and opt.split_size or 0.35
-  M.split_on_top = opt.split_on_top and opt.split_on_top or false
-  M.exclude_filetypes = opt.exclude_filetypes and opt.exclude_filetypes or {}
-  M.exclude_buftypes = opt.exclude_buftypes and opt.exclude_buftypes or {}
+  M.term_mode_hl = opts.term_mode_hl or 'NEO_TERM_COOL_BLACK'
+    if type(M.term_mode_hl) ~= 'string' then M.term_mode_hl = 'NEO_TERM_COOL_BLACK' end
+  M.split_size = opts.split_size or 0.35
+    if type(M.split_size) ~= 'number' then M.split_size = 0.35 end
+  M.split_on_top = opts.split_on_top or false
+    if type(M.split_on_top) ~= 'boolean' then M.split_on_top = true end
+  M.exclude_filetypes = opts.exclude_filetypes or {}
+    if type(M.exclude_filetypes) ~= 'table' then M.exclude_filetypes = {} end
+  M.exclude_buftypes = opts.exclude_buftypes or {}
+    if type(M.exclude_buftypes) ~= 'table' then M.exclude_buftypes = {} end
 
-  create_autocmds()
+  A.create_autocmds()
 end
 
 
