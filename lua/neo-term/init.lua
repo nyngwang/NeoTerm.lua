@@ -24,8 +24,6 @@ local function remove_invalid_mappings()
     end
   end
 end
-
-
 -------------------------------------------------------------------------------------------------------
 function M.setup(opts)
   if not opts then opts = {} end
@@ -113,11 +111,11 @@ end
 
 
 local function setup_vim_commands()
-  vim.cmd [[
-    command! NeoTermOpen lua require'neo-term'.open_termbuf()
-    command! NeoTermClose lua require'neo-term'.close_termbuf()
-    command! NeoTermEnterNormal lua vim.api.nvim_feedkeys('', 't', true)
-  ]]
+  vim.api.nvim_create_user_command('NeoTermOpen', M.open_termbuf, {})
+  vim.api.nvim_create_user_command('NeoTermClose', M.close_termbuf, {})
+  vim.api.nvim_create_user_command('NeoTermEnterNormal', function ()
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes([[<C-\><C-n>]], true, false, true), 't', true)
+  end, {})
 end
 setup_vim_commands()
 
