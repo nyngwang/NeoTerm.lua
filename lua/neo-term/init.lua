@@ -43,10 +43,30 @@ function M.setup(opts)
 end
 
 
-function M.open_termbuf()
+function M.neo_term_toggle()
+
+  -- Case1: already open.
+  if -- TODO: set filetype for NeoTerm.
+    vim.bo.buftype == 'terminal' then
+    vim.cmd('NeoTermEnterNormal')
+    local term_buf = vim.api.nvim_get_current_buf()
+    -- TODO: use `nvim_win_close`.
+    vim.cmd('q')
+
+    local close_buf = vim.api.nvim_get_current_buf()
+    if buf_open_to_term[close_buf] == term_buf then
+      vim.fn.winrestview(view_of_open_buf[close_buf])
+    end
+    remove_invalid_mappings()
+    return
+  end
+
+  -- Case2: might open.
+
   for _, v in pairs(M.exclude_filetypes) do if vim.bo.filetype == v then return end end
   for _, v in pairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
 
+  -- should open.
   local open_win = vim.api.nvim_get_current_win()
   if -- a term-win is there then just use it.
     win_open_to_term[open_win]
@@ -71,6 +91,7 @@ function M.open_termbuf()
   else
     vim.cmd('normal! H')
   end
+  -- TODO: merge into one single string?
   vim.cmd('split')
   vim.cmd('resize ' .. termbuf_size)
   vim.cmd('wincmd p')
@@ -85,6 +106,7 @@ function M.open_termbuf()
   then
     vim.api.nvim_set_current_buf(buf_open_to_term[open_buf])
   else
+    -- TODO: use `vim.fn.termopen`.
     vim.cmd('term')
     buf_open_to_term[open_buf] = vim.api.nvim_win_get_buf(0)
   end
@@ -93,26 +115,8 @@ function M.open_termbuf()
 end
 
 
-function M.close_termbuf()
-  -- double check for users.
-  if not vim.bo.buftype == 'terminal' then return end
-
-  -- close the term-split.
-  vim.cmd('NeoTermEnterNormal')
-  local term_buf = vim.api.nvim_get_current_buf()
-  vim.cmd('q')
-
-  local close_buf = vim.api.nvim_get_current_buf()
-  if buf_open_to_term[close_buf] == term_buf then
-    vim.fn.winrestview(view_of_open_buf[close_buf])
-  end
-  remove_invalid_mappings()
-end
-
-
 local function setup_vim_commands()
-  vim.api.nvim_create_user_command('NeoTermOpen', M.open_termbuf, {})
-  vim.api.nvim_create_user_command('NeoTermClose', M.close_termbuf, {})
+  vim.api.nvim_create_user_command('NeoTermToggle', M.neo_term_toggle, {})
   vim.api.nvim_create_user_command('NeoTermEnterNormal', function ()
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes([[<C-\><C-n>]], true, false, true), 't', true)
   end, {})
