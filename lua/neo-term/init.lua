@@ -59,7 +59,7 @@ function M.neo_term_toggle()
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
     if vim.api.nvim_win_get_buf(w) == buf_open_to_term[vim.api.nvim_get_current_buf()]
     then
-      vim.api.nvim_win_close(w, true)
+      vim.api.nvim_set_current_win(w)
       return
     end
   end
@@ -123,7 +123,7 @@ function M.neo_term_hijack_toggle()
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
     if vim.api.nvim_win_get_buf(w) == buf_open_to_term[vim.api.nvim_get_current_buf()]
     then
-      vim.api.nvim_win_close(w, true)
+      vim.api.nvim_set_current_win(w)
       return
     end
   end
