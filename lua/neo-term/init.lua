@@ -3,7 +3,6 @@ local M = { }
 vim.api.nvim_create_augroup('neo-term.lua', { clear = true })
 -------------------------------------------------------------------------------------------------------
 local buf_open_to_term = { }
-local win_open_to_term = { }
 local view_of_open_buf = { }
 
 
@@ -14,13 +13,6 @@ local function remove_invalid_mappings()
       or (t and not vim.api.nvim_buf_is_valid(t))
     then
       buf_open_to_term[o] = nil
-    end
-  end
-  for o, t in pairs(win_open_to_term) do
-    if
-      t and not vim.api.nvim_win_is_valid(t)
-    then
-      win_open_to_term[o] = nil
     end
   end
 end
@@ -67,15 +59,16 @@ function M.neo_term_toggle()
   for _, v in pairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
 
   -- should open.
-  local open_win = vim.api.nvim_get_current_win()
-  if -- a term-win is there then just use it.
-    win_open_to_term[open_win]
-    and vim.api.nvim_win_is_valid(win_open_to_term[open_win])
-  then
-    vim.api.nvim_set_current_win(win_open_to_term[open_win])
-    return
+  -- if -- a term-win is there then just close it.
+  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_buf(w) == buf_open_to_term[vim.api.nvim_get_current_buf()] then
+      vim.api.nvim_win_close(w, true)
+      return
+    end
   end
 
+
+  local open_win = vim.api.nvim_get_current_win()
   local open_buf = vim.api.nvim_get_current_buf()
   view_of_open_buf[open_buf] = vim.fn.winsaveview()
   local open_win_height = vim.fn.getwininfo(open_win)[1].height
@@ -97,13 +90,11 @@ function M.neo_term_toggle()
   vim.cmd('wincmd p')
   vim.cmd('resize ' .. openbuf_size)
   vim.cmd('wincmd p') -- cursor at termbuf split
-  local term_win = vim.api.nvim_get_current_win()
-  win_open_to_term[open_win] = term_win
 
   if
     buf_open_to_term[open_buf]
     and vim.api.nvim_buf_is_valid(buf_open_to_term[open_buf])
-  then
+  then -- using existing term-buf.
     vim.api.nvim_set_current_buf(buf_open_to_term[open_buf])
   else
     -- TODO: use `vim.fn.termopen`.
