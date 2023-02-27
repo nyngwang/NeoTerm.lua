@@ -36,14 +36,11 @@ end
 
 
 function M.neo_term_toggle()
-
   -- Case1: already open.
-  if -- TODO: set filetype for NeoTerm.
-    vim.bo.buftype == 'terminal' then
+  if vim.bo.filetype == 'neo-term' then
     vim.cmd('NeoTermEnterNormal')
     local term_buf = vim.api.nvim_get_current_buf()
-    -- TODO: use `nvim_win_close`.
-    vim.cmd('q')
+    vim.api.nvim_win_close(0, false)
 
     local close_buf = vim.api.nvim_get_current_buf()
     if buf_open_to_term[close_buf] == term_buf then
@@ -58,16 +55,16 @@ function M.neo_term_toggle()
   for _, v in pairs(M.exclude_filetypes) do if vim.bo.filetype == v then return end end
   for _, v in pairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
 
-  -- should open.
-  -- if -- a term-win is there then just close it.
+  -- Case2.1: two-phrase open when a term-win exists.
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    if vim.api.nvim_win_get_buf(w) == buf_open_to_term[vim.api.nvim_get_current_buf()] then
+    if vim.api.nvim_win_get_buf(w) == buf_open_to_term[vim.api.nvim_get_current_buf()]
+    then
       vim.api.nvim_win_close(w, true)
       return
     end
   end
 
-
+  -- Case2.2: should open.
   local open_win = vim.api.nvim_get_current_win()
   local open_buf = vim.api.nvim_get_current_buf()
   view_of_open_buf[open_buf] = vim.fn.winsaveview()
@@ -75,16 +72,9 @@ function M.neo_term_toggle()
   local termbuf_size = open_win_height * M.split_size
   local openbuf_size = open_win_height - termbuf_size
   local backup_splitbelow = vim.opt.splitbelow
-  if M.split_on_top
-  then vim.opt.splitbelow = false
-  else vim.opt.splitbelow = true end
 
-  if M.split_on_top then
-    vim.cmd('normal! L')
-  else
-    vim.cmd('normal! H')
-  end
-  -- TODO: merge into one single string?
+  vim.opt.splitbelow = not M.split_on_top and true or false
+  vim.cmd('normal! ' .. (M.split_on_top and 'L' or 'H'))
   vim.cmd('split')
   vim.cmd('resize ' .. termbuf_size)
   vim.cmd('wincmd p')
