@@ -1,9 +1,9 @@
 local A = require('neo-term.utils.autocmd')
-local M = { }
+local M = {}
 vim.api.nvim_create_augroup('neo-term.lua', { clear = true })
 -------------------------------------------------------------------------------------------------------
-local buf_open_to_term = { }
-local view_of_open_buf = { }
+local buf_open_to_term = {}
+local view_of_open_buf = {}
 
 
 local function remove_invalid_mappings()
@@ -91,15 +91,17 @@ function M.neo_term_toggle()
   vim.cmd('resize ' .. openbuf_size)
   vim.cmd('wincmd p') -- cursor at termbuf split
 
-  if
-    buf_open_to_term[open_buf]
+  if buf_open_to_term[open_buf]
     and vim.api.nvim_buf_is_valid(buf_open_to_term[open_buf])
-  then -- using existing term-buf.
+  then
     vim.api.nvim_set_current_buf(buf_open_to_term[open_buf])
   else
-    -- TODO: use `vim.fn.termopen`.
-    vim.cmd('term')
-    buf_open_to_term[open_buf] = vim.api.nvim_win_get_buf(0)
+    local buf = vim.api.nvim_create_buf(true, false)
+    vim.api.nvim_buf_set_option(buf, 'filetype', 'neo-term')
+    vim.api.nvim_set_current_buf(buf)
+    vim.fn.termopen(vim.opt.shell:get())
+    vim.cmd('startinsert')
+    buf_open_to_term[open_buf] = vim.api.nvim_get_current_buf()
   end
 
   vim.opt.splitbelow = backup_splitbelow
