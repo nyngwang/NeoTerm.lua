@@ -31,6 +31,7 @@ function M.setup(opts)
   M.exclude_buftypes = opts.exclude_buftypes or {}
     if type(M.exclude_buftypes) ~= 'table' then M.exclude_buftypes = {} end
 
+
   A.create_autocmds()
 end
 
@@ -38,7 +39,6 @@ end
 function M.neo_term_toggle()
   -- Case1: already open.
   if vim.bo.filetype == 'neo-term' then
-    vim.cmd('NeoTermEnterNormal')
     local term_buf = vim.api.nvim_get_current_buf()
     vim.api.nvim_win_close(0, false)
 
@@ -52,6 +52,7 @@ function M.neo_term_toggle()
 
   -- Case2: might open.
 
+  if vim.fn.argc() > 0 then return end
   for _, v in pairs(M.exclude_filetypes) do if vim.bo.filetype == v then return end end
   for _, v in pairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
 
@@ -116,6 +117,7 @@ function M.neo_term_hijack_toggle()
 
   -- Case2: might open.
 
+  if vim.fn.argc() > 0 then return end
   for _, v in pairs(M.exclude_filetypes) do if vim.bo.filetype == v then return end end
   for _, v in pairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
 
