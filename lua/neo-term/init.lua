@@ -98,8 +98,59 @@ function M.neo_term_toggle()
 end
 
 
+function M.neo_term_hijack_toggle()
+  -- Case1: already open.
+  if vim.bo.filetype == 'neo-term' then
+    for o, t in pairs(buf_open_to_term) do
+      if vim.api.nvim_get_current_buf() == t
+      then
+        vim.api.nvim_set_current_buf(o)
+        vim.fn.winrestview(view_of_open_buf[vim.api.nvim_get_current_buf()])
+        remove_invalid_mappings()
+        return
+      end
+    end
+    vim.api.nvim_set_current_buf(vim.api.nvim_create_buf(false, false))
+    return
+  end
+
+  -- Case2: might open.
+
+  for _, v in pairs(M.exclude_filetypes) do if vim.bo.filetype == v then return end end
+  for _, v in pairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
+
+  -- Case2.1: two-phrase open when a term-win exists.
+  for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+    if vim.api.nvim_win_get_buf(w) == buf_open_to_term[vim.api.nvim_get_current_buf()]
+    then
+      vim.api.nvim_win_close(w, true)
+      return
+    end
+  end
+
+  -- Case2.2: should open.
+  local open_buf = vim.api.nvim_get_current_buf()
+  view_of_open_buf[open_buf] = vim.fn.winsaveview()
+
+  if buf_open_to_term[open_buf]
+    and vim.api.nvim_buf_is_valid(buf_open_to_term[open_buf])
+  then
+    vim.api.nvim_set_current_buf(buf_open_to_term[open_buf])
+  else
+    local buf = vim.api.nvim_create_buf(true, false)
+    vim.api.nvim_buf_set_option(buf, 'filetype', 'neo-term')
+    vim.api.nvim_set_current_buf(buf)
+    vim.fn.termopen(vim.opt.shell:get())
+    vim.cmd('startinsert')
+    print(buf == vim.api.nvim_get_current_buf())
+    buf_open_to_term[open_buf] = vim.api.nvim_get_current_buf()
+  end
+end
+
+
 local function setup_vim_commands()
   vim.api.nvim_create_user_command('NeoTermToggle', M.neo_term_toggle, {})
+  vim.api.nvim_create_user_command('NeoTermHijackToggle', M.neo_term_hijack_toggle, {})
   vim.api.nvim_create_user_command('NeoTermEnterNormal', function ()
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes([[<C-\><C-n>]], true, false, true), 't', true)
   end, {})
