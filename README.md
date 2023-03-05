@@ -1,7 +1,10 @@
+<img src="https://neovim.io/logos/neovim-mark-flat.png" align="right" width="100" />
+
 NeoTerm.lua
 -----
 
 Attach a terminal for each **buffer**, now with stable toggle and astonishing cursor restoring :)
+
 
 ## DEMO
 
