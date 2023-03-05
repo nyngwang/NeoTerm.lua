@@ -31,19 +31,13 @@ use {
   'nyngwang/NeoTerm.lua',
   config = function ()
     require('neo-term').setup {
-      -- split_on_top = true,
-      -- split_size = 0.5,
-      exclude_buftypes = { 'terminal' }, -- these two options will affect `NeoTermOpen`
-      exclude_filetypes = { 'neo-tree', 'dashboard' },
+      split_on_top = true,
+      split_size = 0.45,
+      exclude_filetypes = { 'oil' },
+      exclude_buftypes = { 'terminal' },
     }
-    vim.keymap.set('n', '<M-Tab>', function ()
-      if vim.bo.buftype == 'terminal' then
-        vim.cmd('NeoTermClose')
-      else
-        vim.cmd('NeoTermOpen')
-      end
-    end, NOREF_NOERR_TRUNC)
-    vim.keymap.set('t', '<M-Tab>', function () vim.cmd('NeoTermEnterNormal') end, NOREF_NOERR_TRUNC)
+    vim.keymap.set('n', '<M-Tab>', function () vim.cmd('NeoTermHijackToggle') end, G.NOREF_NOERR_TRUNC)
+    vim.keymap.set('t', '<M-Tab>', function () vim.cmd('NeoTermEnterNormal') end, G.NOREF_NOERR_TRUNC)
   end
 }
 ```
