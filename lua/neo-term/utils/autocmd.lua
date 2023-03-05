@@ -30,6 +30,15 @@ function M.create_autocmds()
       vim.cmd('startinsert')
     end
   })
+  -- cancel-insert on exit term-buf of NeoTerm.
+  vim.api.nvim_create_autocmd({ 'BufLeave' }, {
+    group = 'neo-term.lua',
+    pattern = '*',
+    callback = function ()
+      if vim.bo.filetype ~= 'neo-term' then return end
+      vim.cmd('stopinsert')
+    end
+  })
 end
 
 
