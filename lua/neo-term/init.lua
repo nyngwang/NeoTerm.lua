@@ -52,7 +52,7 @@ function M.neo_term_toggle()
 
   -- Case2: might open.
 
-  if vim.fn.argc() > 0 then return end
+  if os.getenv('NVIM') then return end
   for _, v in pairs(M.exclude_filetypes) do if vim.bo.filetype == v then return end end
   for _, v in pairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
 
@@ -117,7 +117,7 @@ function M.neo_term_hijack_toggle()
 
   -- Case2: might open.
 
-  if vim.fn.argc() > 0 then return end
+  if os.getenv('NVIM') then return end
   for _, v in pairs(M.exclude_filetypes) do if vim.bo.filetype == v then return end end
   for _, v in pairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
 
