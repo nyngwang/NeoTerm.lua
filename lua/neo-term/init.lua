@@ -1,4 +1,5 @@
 local A = require('neo-term.utils.autocmd')
+local RG = require('neo-term.utils.rpc_git')
 local M = {}
 vim.api.nvim_create_augroup('neo-term.lua', { clear = true })
 -------------------------------------------------------------------------------------------------------
@@ -31,8 +32,8 @@ function M.setup(opts)
   M.exclude_buftypes = opts.exclude_buftypes or {}
     if type(M.exclude_buftypes) ~= 'table' then M.exclude_buftypes = {} end
 
-
   A.create_autocmds()
+  RG.guest_run()
 end
 
 
