@@ -3,7 +3,12 @@
 NeoTerm.lua
 -----
 
-Attach a terminal for each **buffer**, now with stable toggle and astonishing cursor restoring :)
+Now you have two sides for each **buffer**:
+
+1. The buffer itself
+2. Its terminal buffer.
+
+and you just use one single command `NeoTermToggle` to switch the side of each one :)
 
 
 ## DEMO
@@ -13,23 +18,18 @@ https://user-images.githubusercontent.com/24765272/174679989-55301311-632a-4abe-
 
 ## Feat.
 
-- ~0ms load time (lines < 160)
-- No dependency
-- Only contains three commands: Simpel adn Powerful
-- Focus on UX:
-  - Easy to config (config still readable 100 years later)
-    - Copy-paste-and-lets-go config below
-  - Stabilized toggle (`row`,`col`,`topline` are all kept)
-    - And you can toggle on top to protect your neck (Wow)
-  - Auto enter insert-mode on `BufEnter` the terminal (Wow)
-  - Customizable(`term_mode_hl`) background color on enter termbuf insert-mode (Wow)
+- ~0ms load time (lines ~200)
+- No dependency.
+- Only add two commands in your pocket: easy to remember.
+- Focus on DX:
+  - simple `setup`, so always readable.
+  - auto enter insert-mode on `BufEnter` the terminal.
+  - customizable(`term_mode_hl`) background color on enter termbuf insert-mode. :art:
 
 
 ## Config
 
 ```lua
-local NOREF_NOERR_TRUNC = { noremap = true, silent = true, nowait = true }
-
 use {
   'nyngwang/NeoTerm.lua',
   config = function ()
@@ -39,8 +39,8 @@ use {
       exclude_filetypes = { 'oil' },
       exclude_buftypes = { 'terminal' },
     }
-    vim.keymap.set('n', '<M-Tab>', function () vim.cmd('NeoTermHijackToggle') end, G.NOREF_NOERR_TRUNC)
-    vim.keymap.set('t', '<M-Tab>', function () vim.cmd('NeoTermEnterNormal') end, G.NOREF_NOERR_TRUNC)
+    vim.keymap.set('n', '<M-Tab>', function () vim.cmd('NeoTermToggle') end)
+    vim.keymap.set('t', '<M-Tab>', function () vim.cmd('NeoTermEnterNormal') end)
   end
 }
 ```
