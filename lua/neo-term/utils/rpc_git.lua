@@ -3,6 +3,9 @@ local M = {}
 
 function M.host_run(arg, socket_guest)
   vim.cmd('NeoTermToggle')
+  if #vim.api.nvim_tabpage_list_wins(0) == 1 then
+    vim.cmd('vsplit')
+  end
   local buf_enter = vim.api.nvim_get_current_buf()
   vim.cmd('e ' .. arg)
   local buf_commit = vim.api.nvim_get_current_buf()
