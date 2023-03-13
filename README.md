@@ -34,8 +34,6 @@ use {
   'nyngwang/NeoTerm.lua',
   config = function ()
     require('neo-term').setup {
-      split_on_top = true,
-      split_size = 0.45,
       exclude_filetypes = { 'oil' },
       exclude_buftypes = { 'terminal' },
     }

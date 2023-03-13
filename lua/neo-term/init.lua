@@ -24,10 +24,6 @@ function M.setup(opts)
 
   M.term_mode_hl = opts.term_mode_hl or 'NEO_TERM_COOL_BLACK'
     if type(M.term_mode_hl) ~= 'string' then M.term_mode_hl = 'NEO_TERM_COOL_BLACK' end
-  M.split_size = opts.split_size or 0.35
-    if type(M.split_size) ~= 'number' then M.split_size = 0.35 end
-  M.split_on_top = opts.split_on_top or false
-    if type(M.split_on_top) ~= 'boolean' then M.split_on_top = true end
   M.exclude_filetypes = U.table_add_values({ 'git.*' },
     type(opts.exclude_filetypes) == 'table' and opts.exclude_filetypes or {})
   M.exclude_buftypes = opts.exclude_buftypes or {}
