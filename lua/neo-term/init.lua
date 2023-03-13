@@ -1,3 +1,4 @@
+local U = require('neo-term.utils')
 local A = require('neo-term.utils.autocmd')
 local RG = require('neo-term.utils.rpc_git')
 local M = {}
@@ -27,8 +28,8 @@ function M.setup(opts)
     if type(M.split_size) ~= 'number' then M.split_size = 0.35 end
   M.split_on_top = opts.split_on_top or false
     if type(M.split_on_top) ~= 'boolean' then M.split_on_top = true end
-  M.exclude_filetypes = opts.exclude_filetypes or {}
-    if type(M.exclude_filetypes) ~= 'table' then M.exclude_filetypes = {} end
+  M.exclude_filetypes = U.table_add_values({ 'git.*' },
+    type(opts.exclude_filetypes) == 'table' and opts.exclude_filetypes or {})
   M.exclude_buftypes = opts.exclude_buftypes or {}
     if type(M.exclude_buftypes) ~= 'table' then M.exclude_buftypes = {} end
 
@@ -56,8 +57,10 @@ function M.neo_term_toggle()
   -- Case2: might open.
 
   if os.getenv('NVIM') then return end
-  for _, v in pairs(M.exclude_filetypes) do if vim.bo.filetype == v then return end end
-  for _, v in pairs(M.exclude_buftypes) do if vim.bo.buftype == v then return end end
+
+  if U.table_contains(M.exclude_filetypes, vim.bo.filetype)
+    or U.table_contains(M.exclude_buftypes, vim.bo.buftype)
+  then return end
 
   -- Case2.1: two-phrase open when a term-win exists.
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
