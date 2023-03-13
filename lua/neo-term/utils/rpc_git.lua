@@ -2,7 +2,7 @@ local M = {}
 
 
 function M.host_run(arg, socket_guest)
-  vim.cmd('NeoTermHijackToggle')
+  vim.cmd('NeoTermToggle')
   local buf_enter = vim.api.nvim_get_current_buf()
   vim.cmd('e ' .. arg)
   local buf_commit = vim.api.nvim_get_current_buf()
@@ -19,7 +19,7 @@ function M.host_run(arg, socket_guest)
       vim.cmd('split')
       vim.opt.splitbelow = sb
       vim.api.nvim_set_current_buf(buf_enter)
-      vim.cmd('NeoTermHijackToggle')
+      vim.cmd('NeoTermToggle')
       vim.cmd('startinsert')
     end
   })
