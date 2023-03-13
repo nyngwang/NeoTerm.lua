@@ -13,7 +13,7 @@ and you just use one single command `NeoTermToggle` to switch the side of each o
 
 ## DEMO
 
-https://user-images.githubusercontent.com/24765272/174679989-55301311-632a-4abe-9521-1df890f47f54.mov
+https://user-images.githubusercontent.com/24765272/224787066-a51f18d3-3da7-440d-ab77-349a59aac050.mov
 
 
 ## Feat.
