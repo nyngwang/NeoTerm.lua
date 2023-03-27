@@ -3,39 +3,30 @@ local M = {}
 
 function M.host_run(arg, socket_guest)
   local buf_term_host = vim.api.nvim_get_current_buf()
-  vim.cmd('NeoTermToggle')
-  vim.cmd('stopinsert')
   if #vim.tbl_filter(
       function (w) return vim.api.nvim_win_get_config(w).relative == '' end,
       vim.api.nvim_tabpage_list_wins(0)
     ) == 1
   then vim.cmd('vsplit') end
 
-  local buf_open_host = 0
-  for bo, bt in pairs(require('neo-term').buf_open_to_term) do
-    if bt == buf_term_host then
-      buf_open_host = bo
-      break
-    end
-  end
-
   vim.cmd('e ' .. arg)
+  vim.cmd('stopinsert')
   local buf_commit = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_option(buf_commit, 'bh', 'delete')
+
   vim.api.nvim_create_autocmd('WinClosed', {
     buffer = buf_commit,
     once = true,
     callback = function ()
+      local rpc_guest = vim.fn.sockconnect('pipe', socket_guest, { rpc = true })
+      vim.rpcnotify(rpc_guest, 'nvim_exec_lua', [[vim.cmd('qa!')]], {})
+      vim.fn.chanclose(rpc_guest)
       local sb = vim.opt.splitbelow
       vim.opt.splitbelow = false
       vim.cmd('split')
       vim.opt.splitbelow = sb
-      vim.api.nvim_set_current_buf(buf_open_host)
-      vim.cmd('NeoTermToggle')
+      vim.api.nvim_set_current_buf(buf_term_host)
       vim.cmd('startinsert')
-      local rpc_guest = vim.fn.sockconnect('pipe', socket_guest, { rpc = true })
-      vim.rpcnotify(rpc_guest, 'nvim_exec_lua', [[vim.cmd('qa!')]], {})
-      vim.fn.chanclose(rpc_guest)
     end
   })
 end
