@@ -37,6 +37,16 @@ end
 function M.neo_term_toggle()
   -- Case1: already open.
   if vim.bo.filetype == 'neo-term' then
+    -- Case1.1: it's a dead terminal.
+    if vim.fn.jobwait({ vim.bo.channel }, 0)[1] == -3 then
+      vim.bo.bufhidden = 'delete'
+      local buf = vim.api.nvim_create_buf(true, false)
+      vim.api.nvim_set_current_buf(buf)
+      M.neo_term_toggle()
+      return
+    end
+
+    -- Case1.2: it's a live terminal.
     for o, t in pairs(buf_open_to_term) do
       if vim.api.nvim_get_current_buf() == t
       then

@@ -18,9 +18,6 @@ function M.host_run(arg, socket_guest)
     buffer = buf_commit,
     once = true,
     callback = function ()
-      local rpc_guest = vim.fn.sockconnect('pipe', socket_guest, { rpc = true })
-      vim.rpcnotify(rpc_guest, 'nvim_exec_lua', [[vim.cmd('qa!')]], {})
-      vim.fn.chanclose(rpc_guest)
       local sb = vim.opt.splitbelow
       vim.opt.splitbelow = false
       vim.cmd('split')
@@ -28,6 +25,9 @@ function M.host_run(arg, socket_guest)
       vim.api.nvim_set_current_buf(buf_enter)
       vim.cmd('NeoTermToggle')
       vim.cmd('startinsert')
+      local rpc_guest = vim.fn.sockconnect('pipe', socket_guest, { rpc = true })
+      vim.rpcnotify(rpc_guest, 'nvim_exec_lua', [[vim.cmd('qa!')]], {})
+      vim.fn.chanclose(rpc_guest)
     end
   })
 end
