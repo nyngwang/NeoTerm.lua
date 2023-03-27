@@ -80,7 +80,6 @@ function M.neo_term_toggle()
     vim.api.nvim_buf_set_option(buf, 'filetype', 'neo-term')
     vim.api.nvim_set_current_buf(buf)
     vim.fn.termopen(vim.opt.shell:get())
-    vim.cmd('startinsert')
     buf_open_to_term[open_buf] = vim.api.nvim_get_current_buf()
   end
 end
