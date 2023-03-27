@@ -3,6 +3,7 @@ local M = {}
 
 function M.host_run(arg, socket_guest)
   vim.cmd('NeoTermToggle')
+  vim.cmd('stopinsert')
   if #vim.tbl_filter(
       function (w) return vim.api.nvim_win_get_config(w).relative == '' end,
       vim.api.nvim_tabpage_list_wins(0)
