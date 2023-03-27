@@ -2,6 +2,7 @@ local M = {}
 
 
 function M.host_run(arg, socket_guest)
+  local buf_term_host = vim.api.nvim_get_current_buf()
   vim.cmd('NeoTermToggle')
   vim.cmd('stopinsert')
   if #vim.tbl_filter(
@@ -10,7 +11,14 @@ function M.host_run(arg, socket_guest)
     ) == 1
   then vim.cmd('vsplit') end
 
-  local buf_enter = vim.api.nvim_get_current_buf()
+  local buf_open_host = 0
+  for bo, bt in pairs(require('neo-term').buf_open_to_term) do
+    if bt == buf_term_host then
+      buf_open_host = bo
+      break
+    end
+  end
+
   vim.cmd('e ' .. arg)
   local buf_commit = vim.api.nvim_get_current_buf()
   vim.api.nvim_buf_set_option(buf_commit, 'bh', 'delete')
@@ -22,7 +30,7 @@ function M.host_run(arg, socket_guest)
       vim.opt.splitbelow = false
       vim.cmd('split')
       vim.opt.splitbelow = sb
-      vim.api.nvim_set_current_buf(buf_enter)
+      vim.api.nvim_set_current_buf(buf_open_host)
       vim.cmd('NeoTermToggle')
       vim.cmd('startinsert')
       local rpc_guest = vim.fn.sockconnect('pipe', socket_guest, { rpc = true })

@@ -4,17 +4,17 @@ local RG = require('neo-term.utils.rpc_git')
 local M = {}
 vim.api.nvim_create_augroup('neo-term.lua', { clear = true })
 -------------------------------------------------------------------------------------------------------
-local buf_open_to_term = {}
+M.buf_open_to_term = {}
 local view_of_open_buf = {}
 
 
 local function remove_invalid_mappings()
-  for o, t in pairs(buf_open_to_term) do
+  for o, t in pairs(M.buf_open_to_term) do
     if
       not vim.api.nvim_buf_is_valid(o)
       or (t and not vim.api.nvim_buf_is_valid(t))
     then
-      buf_open_to_term[o] = nil
+      M.buf_open_to_term[o] = nil
     end
   end
 end
@@ -47,7 +47,7 @@ function M.neo_term_toggle()
     end
 
     -- Case1.2: it's a live terminal.
-    for o, t in pairs(buf_open_to_term) do
+    for o, t in pairs(M.buf_open_to_term) do
       if vim.api.nvim_get_current_buf() == t
       then
         vim.api.nvim_set_current_buf(o)
@@ -70,7 +70,7 @@ function M.neo_term_toggle()
 
   -- Case2.1: two-phrase open when a term-win exists.
   for _, w in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    if vim.api.nvim_win_get_buf(w) == buf_open_to_term[vim.api.nvim_get_current_buf()]
+    if vim.api.nvim_win_get_buf(w) == M.buf_open_to_term[vim.api.nvim_get_current_buf()]
     then
       vim.api.nvim_set_current_win(w)
       return
@@ -81,16 +81,16 @@ function M.neo_term_toggle()
   local open_buf = vim.api.nvim_get_current_buf()
   view_of_open_buf[open_buf] = vim.fn.winsaveview()
 
-  if buf_open_to_term[open_buf]
-    and vim.api.nvim_buf_is_valid(buf_open_to_term[open_buf])
+  if M.buf_open_to_term[open_buf]
+    and vim.api.nvim_buf_is_valid(M.buf_open_to_term[open_buf])
   then
-    vim.api.nvim_set_current_buf(buf_open_to_term[open_buf])
+    vim.api.nvim_set_current_buf(M.buf_open_to_term[open_buf])
   else
     local buf = vim.api.nvim_create_buf(true, false)
     vim.api.nvim_buf_set_option(buf, 'filetype', 'neo-term')
     vim.api.nvim_set_current_buf(buf)
     vim.fn.termopen(vim.opt.shell:get())
-    buf_open_to_term[open_buf] = vim.api.nvim_get_current_buf()
+    M.buf_open_to_term[open_buf] = vim.api.nvim_get_current_buf()
   end
 end
 
