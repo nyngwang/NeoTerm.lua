@@ -21,10 +21,7 @@ function M.host_run(arg, socket_guest)
       local rpc_guest = vim.fn.sockconnect('pipe', socket_guest, { rpc = true })
       vim.rpcnotify(rpc_guest, 'nvim_exec_lua', [[vim.cmd('qa!')]], {})
       vim.fn.chanclose(rpc_guest)
-      local sb = vim.opt.splitbelow
-      vim.opt.splitbelow = false
-      vim.cmd('split')
-      vim.opt.splitbelow = sb
+      vim.cmd('vsplit')
       vim.api.nvim_set_current_buf(buf_term_host)
       vim.cmd('startinsert')
     end
