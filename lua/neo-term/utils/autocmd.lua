@@ -20,8 +20,7 @@ local function create_hotfix_autocmds()
       for o, t in pairs(require('neo-term').buf_open_to_term) do
         if vim.api.nvim_get_current_buf() == t
         then
-          -- NOTE: the order matters.
-          -- should restore view AFTER split.
+          -- NOTE: the order matters: should split the window first BEFORE restoring its view.
           vim.cmd('vsplit')
           vim.api.nvim_set_current_buf(o)
           vim.fn.winrestview(require('neo-term').view_of_open_buf[o])
