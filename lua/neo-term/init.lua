@@ -1,6 +1,7 @@
 local U = require('neo-term.utils')
 local A = require('neo-term.utils.autocmd')
 local RG = require('neo-term.utils.rpc_git')
+local P = require('neo-term.presets')
 local M = {}
 vim.api.nvim_create_augroup('neo-term.lua', { clear = true })
 -------------------------------------------------------------------------------------------------------
@@ -28,8 +29,11 @@ function M.setup(opts)
     type(opts.exclude_filetypes) == 'table' and opts.exclude_filetypes or {})
   M.exclude_buftypes = opts.exclude_buftypes or {}
     if type(M.exclude_buftypes) ~= 'table' then M.exclude_buftypes = {} end
+  M.presets = opts.presets
+    if type(M.presets) ~= 'table' then M.presets = { 'vim-test' } end
 
   A.create_autocmds()
+  P.setup(M.presets)
   RG.guest_run()
 end
 
