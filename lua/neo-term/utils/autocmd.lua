@@ -42,7 +42,7 @@ local function create_features_autocmds()
         or vim.bo.buftype ~= 'terminal'
       then return end
       vim.cmd('hi NEO_TERM_COOL_BLACK guibg=#101010')
-      vim.cmd('set winhl=Normal:' .. require('neo-term').term_mode_hl)
+      vim.cmd('set winhl=Normal:' .. (require('neo-term').term_mode_hl or 'NEO_TERM_COOL_BLACK'))
     end
   })
   -- reset bg-color on leave term-mode of NeoTerm.
