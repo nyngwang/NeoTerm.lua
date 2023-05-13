@@ -26,6 +26,10 @@ https://user-images.githubusercontent.com/24765272/224787066-a51f18d3-3da7-440d-
   - auto enter insert-mode on `BufEnter` the terminal.
   - customizable(`term_mode_hl`) background color on enter termbuf insert-mode. :art:
 
+### Feat.
+
+- support [`vim-test/vim-test`](https://github.com/vim-test/vim-test) out-of-the-box (`setup.presets`).
+
 
 ## Config
 
@@ -36,6 +40,10 @@ use {
     require('neo-term').setup {
       exclude_filetypes = { 'oil' },
       exclude_buftypes = { 'terminal' },
+      -- enabled by default!
+      -- presets = {
+      --   'vim-test',
+      -- }
     }
     vim.keymap.set('n', '<M-Tab>', function () vim.cmd('NeoTermToggle') end)
     vim.keymap.set('t', '<M-Tab>', function () vim.cmd('NeoTermEnterNormal') end)
