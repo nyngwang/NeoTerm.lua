@@ -12,7 +12,7 @@ function M.host_run(arg, socket_guest)
   vim.cmd('e ' .. arg)
   vim.cmd('stopinsert')
   local buf_commit = vim.api.nvim_get_current_buf()
-  vim.api.nvim_buf_set_option(buf_commit, 'bh', 'delete')
+  vim.bo[buf_commit].bh = 'delete'
 
   vim.api.nvim_create_autocmd('WinClosed', {
     buffer = buf_commit,

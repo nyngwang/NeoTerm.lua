@@ -91,7 +91,7 @@ function M.neo_term_toggle()
     vim.api.nvim_set_current_buf(M.buf_open_to_term[open_buf])
   else
     local buf = vim.api.nvim_create_buf(true, false)
-    vim.api.nvim_buf_set_option(buf, 'filetype', 'neo-term')
+    vim.bo[buf].filetype = 'neo-term'
     vim.api.nvim_set_current_buf(buf)
     vim.fn.termopen(vim.opt.shell:get())
     M.buf_open_to_term[open_buf] = vim.api.nvim_get_current_buf()

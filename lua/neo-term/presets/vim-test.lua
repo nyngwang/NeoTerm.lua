@@ -11,7 +11,7 @@ function M.setup()
         print("NeoTerm.lua: vim-test command cancelled. Create a termbuf for the current buffer first.")
         return
       end
-      local channel_term = vim.api.nvim_buf_get_option(term_cur_buf, 'channel')
+      local channel_term = vim.bo[term_cur_buf].channel
       vim.api.nvim_chan_send(channel_term, cmd .. '\n')
     end
   }
