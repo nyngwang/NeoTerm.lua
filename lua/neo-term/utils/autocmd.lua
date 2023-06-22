@@ -29,6 +29,24 @@ local function create_hotfix_autocmds()
       end
     end,
   })
+  -- see: https://github.com/nyngwang/NeoTerm.lua/issues/24.
+  vim.api.nvim_create_autocmd({ 'TermClose' }, {
+    group = 'neo-term.lua',
+    callback = function (args)
+      if vim.bo.filetype ~= 'neo-term'
+        or vim.bo.buftype ~= 'terminal'
+      then return end
+
+      if #vim.tbl_filter(
+          function (w) return vim.api.nvim_win_get_config(w).relative == '' end,
+          vim.api.nvim_tabpage_list_wins(0)
+        ) == 1
+      then
+        vim.cmd('vsplit')
+        vim.fn.feedkeys(' ', 'n')
+      end
+    end,
+  })
 end
 
 
