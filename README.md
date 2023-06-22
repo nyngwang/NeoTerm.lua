@@ -39,7 +39,7 @@ use {
   config = function ()
     require('neo-term').setup {
       exclude_filetypes = { 'oil' },
-      exclude_buftypes = { 'terminal' },
+      -- exclude_buftypes = {}, -- 'terminal' will always be added by NeoTerm.lua
       -- enabled by default!
       -- presets = {
       --   'vim-test',

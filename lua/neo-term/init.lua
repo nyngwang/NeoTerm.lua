@@ -27,8 +27,8 @@ function M.setup(opts)
     if type(M.term_mode_hl) ~= 'string' then M.term_mode_hl = 'NEO_TERM_COOL_BLACK' end
   M.exclude_filetypes = U.table_add_values({ 'git.*' },
     type(opts.exclude_filetypes) == 'table' and opts.exclude_filetypes or {})
-  M.exclude_buftypes = opts.exclude_buftypes or {}
-    if type(M.exclude_buftypes) ~= 'table' then M.exclude_buftypes = {} end
+  M.exclude_buftypes = U.table_add_values({ 'terminal' },
+    type(opts.exclude_buftypes) == 'table' and opts.exclude_buftypes or {})
   M.presets = opts.presets
     if type(M.presets) ~= 'table' then M.presets = { 'vim-test' } end
 
