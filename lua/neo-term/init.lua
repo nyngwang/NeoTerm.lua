@@ -23,6 +23,8 @@ end
 function M.setup(opts)
   if not opts then opts = {} end
 
+  vim.api.nvim_set_hl(0, 'NEO_TERM_COOL_BLACK', { bg = '#101010' })
+
   M.term_mode_hl = opts.term_mode_hl or 'NEO_TERM_COOL_BLACK'
     if type(M.term_mode_hl) ~= 'string' then M.term_mode_hl = 'NEO_TERM_COOL_BLACK' end
   M.exclude_filetypes = U.table_add_values({ 'git.*' },
