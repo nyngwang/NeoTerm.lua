@@ -59,7 +59,9 @@ local function create_features_autocmds()
       if vim.bo.filetype ~= 'neo-term'
         or vim.bo.buftype ~= 'terminal'
       then return end
-      vim.cmd('set winhl=Normal:' .. (require('neo-term').term_mode_hl or 'NEO_TERM_COOL_BLACK'))
+      vim.opt_local.winhighlight = {
+        Normal = require('neo-term').term_mode_hl or 'NEO_TERM_COOL_BLACK',
+      }
     end
   })
   -- reset bg-color on leave term-mode of NeoTerm.
@@ -70,7 +72,7 @@ local function create_features_autocmds()
       if vim.bo.filetype ~= 'neo-term'
         or vim.bo.buftype ~= 'terminal'
       then return end
-      vim.cmd('set winhl=')
+      vim.opt_local.winhighlight = {}
     end
   })
   -- auto-insert on enter term-buf of NeoTerm.
