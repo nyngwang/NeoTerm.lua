@@ -7,6 +7,8 @@ vim.api.nvim_create_augroup('neo-term.lua', { clear = true })
 -------------------------------------------------------------------------------------------------------
 M.buf_open_to_term = {}
 M.view_of_open_buf = {}
+M.global_term_buf = nil
+M.last_non_term_buf = nil
 
 
 local function remove_invalid_mappings()
@@ -31,6 +33,7 @@ function M.setup(opts)
     type(opts.exclude_buftypes) == 'table' and opts.exclude_buftypes or {})
   M.presets = opts.presets
     if type(M.presets) ~= 'table' then M.presets = { 'vim-test' } end
+  M.enable_global_term = opts.enable_global_term == true
 
   A.create_autocmds()
   P.setup(M.presets)
@@ -51,15 +54,13 @@ function M.neo_term_toggle()
     end
 
     -- Case1.2: it's a live terminal.
-    for o, t in pairs(M.buf_open_to_term) do
-      if vim.api.nvim_get_current_buf() == t
-      then
-        vim.api.nvim_set_current_buf(o)
-        vim.fn.winrestview(M.view_of_open_buf[vim.api.nvim_get_current_buf()])
-        remove_invalid_mappings()
-        return
-      end
+    if vim.api.nvim_buf_is_valid(M.last_non_term_buf) then
+      vim.api.nvim_set_current_buf(M.last_non_term_buf)
+      vim.fn.winrestview(M.view_of_open_buf[vim.api.nvim_get_current_buf()])
+      remove_invalid_mappings()
+      return
     end
+
     vim.api.nvim_set_current_buf(vim.api.nvim_create_buf(false, false))
     return
   end
@@ -83,19 +84,31 @@ function M.neo_term_toggle()
 
   -- Case2.2: should open.
   local open_buf = vim.api.nvim_get_current_buf()
+  M.last_non_term_buf = open_buf
   M.view_of_open_buf[open_buf] = vim.fn.winsaveview()
 
-  if M.buf_open_to_term[open_buf]
-    and vim.api.nvim_buf_is_valid(M.buf_open_to_term[open_buf])
-  then
-    vim.api.nvim_set_current_buf(M.buf_open_to_term[open_buf])
-  else
-    local buf = vim.api.nvim_create_buf(true, false)
-    vim.bo[buf].filetype = 'neo-term'
-    vim.api.nvim_set_current_buf(buf)
-    vim.fn.termopen(vim.opt.shell:get())
-    M.buf_open_to_term[open_buf] = vim.api.nvim_get_current_buf()
+  local term_buf = M.buf_open_to_term[open_buf]
+  if term_buf and vim.api.nvim_buf_is_valid(term_buf) then
+    vim.api.nvim_set_current_buf(term_buf)
+    return
   end
+
+  -- global_term_buf won't be initialized if global term is not enabled
+  if M.global_term_buf and vim.api.nvim_buf_is_valid(M.global_term_buf) then
+    vim.api.nvim_set_current_buf(M.global_term_buf)
+  else
+    term_buf = vim.api.nvim_create_buf(true, false)
+    vim.bo[term_buf].filetype = 'neo-term'
+
+    if M.enable_global_term then
+      M.global_term_buf = term_buf
+    end
+
+    vim.api.nvim_set_current_buf(term_buf)
+    vim.fn.termopen(vim.opt.shell:get())
+  end
+
+  M.buf_open_to_term[open_buf] = vim.api.nvim_get_current_buf()
 end
 
 

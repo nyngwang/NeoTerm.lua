@@ -44,6 +44,7 @@ use {
       -- presets = {
       --   'vim-test',
       -- }
+      -- enable_global_term = true, -- Enable global terminal buffer for every buffers
     }
     vim.keymap.set('n', '<M-Tab>', function () vim.cmd('NeoTermToggle') end)
     vim.keymap.set('t', '<M-Tab>', function () vim.cmd('NeoTermEnterNormal') end)
